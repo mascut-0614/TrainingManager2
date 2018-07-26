@@ -11,7 +11,7 @@ using UniRx;
 //カレンダーのボタンのレイアウトを変更するスクリプト
 public class CalendarButton : MonoBehaviour
 {
-	enum csvData { date, pushUp };  //enumによるインデックスの宣言(記録用)
+	enum csvData { date, pushUp, crunch };  //enumによるインデックスの宣言(記録用)
 	public CalendarManager calendar;    //操作するカレンダー
     public CalendarDetail detail;
 	public GameObject button;   //マス
@@ -28,7 +28,6 @@ public class CalendarButton : MonoBehaviour
     {
         //ボタンのコンポーネント化、およびテキストサイズなど
         calendar = FindObjectOfType<CalendarManager>();
-		//detail = FindObjectOfType<CalendarDetail>();
 		text = this.transform.GetChild(0).gameObject;
 		text.GetComponent<TextMesh>().fontSize = 20;
 
@@ -42,15 +41,15 @@ public class CalendarButton : MonoBehaviour
 			if (dateValue == DateTime.Today) {
 				this.GetComponent<Renderer>().material.color = Color.yellow;
 				this.transform.tag = "Today";
-			}else {
+			} else {
 				this.GetComponent<Renderer>().material.color = Color.white;
 				this.transform.tag = "Untagged";
-			}
+		    	} 
             });
     }
     //岩瀬　追加分
 	public void DetailActivate(){
-		detail.Activate(dateValue, count);
+		//detail.Activate(dateValue, count);
 	}
 
     //土日の色を変える関数
@@ -69,6 +68,13 @@ public class CalendarButton : MonoBehaviour
 			return Color.gray;
 		}
 	}
+
+    //日付でシリアルナンバーを作成するメソッド
+    string MakeDate(DateTime tm)
+    {
+        return tm.Year.ToString() + (((int)tm.Month < 10) ? "0" : "")
+               + tm.Month.ToString() + (((int)tm.Day < 10) ? "0" : "") + tm.Day.ToString();
+    }
 }
 
 //DateTimeの拡張

@@ -6,27 +6,31 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
-using UniRx;
 
 public class CalendarManager : MonoBehaviour
 {
-    enum csvData { date, pushUp };  //enumによるインデックスの宣言(記録用)
+    enum csvData { date, pushUp, crunch };  //enumによるインデックスの宣言(記録用)
 	public GameObject calendarParent;   //親オブジェクト
 	public GameObject nextButton;   //来月
 	public GameObject prevButton;   //先月
-    //public Button backToHome;   //メインメニュに戻る
 	public DateTime current;    //カレンダーの日時
 	GameObject[] objDays = new GameObject[42];  //Buttonオブジェクト
 	CalendarButton[] Days = new CalendarButton[42]; //カレンダーの日付マス
-	//public Button toMonth;  //カレンダーの月のボタン
 	public GameObject monthText;  //カレンダーの月テキスト
 
+    const string sumi = "Textures/sumi";    //スタンプの場所
+    const string sumi2 = "Textures/sumi2";  //スタンプの場所2
+    Texture2D stamp;                        //スタンプのテクスチャ
+    Texture2D stamp2;                       //スタンプのテクスチャ2
 
 	// Use this for initialization
 	void Start()
 	{
 		//現在の日付を取得
 		current = new DateTime(DateTime.Today.Year, DateTime.Today.Month, DateTime.Today.Day);
+
+        //テクスチャのデータをロードする
+        stamp = Resources.Load<Texture2D>(sumi);
 
 		//初期設定
 		initCalendarComponent();
@@ -88,75 +92,33 @@ public class CalendarManager : MonoBehaviour
 				cDay.dateValue = new DateTime(current.Year, current.Month, day);
 				day++;
 			}
-		}
 
-        //読み込み用のstring
-/*        string line;
-        //ストリームリーダを呼び出す
-        StreamReader sr = new StreamReader(@"saveData.csv", Encoding.GetEncoding("Shift_JIS"));
-        //ストリームの読み込み
-        while ((line = sr.ReadLine()) != null)
-        {
-            string[] splitedLine = line.Split(',');
-            //シリアルがカレンダーの範囲内にあるか確かめる
-            if(isInRange(splitedLine[(int)csvData.date])){
-                //あればその日を探してカウントに入れる
-                foreach (var cDay in Days){
-                    if(MakeDate(cDay.dateValue) == splitedLine[(int)csvData.date]){
-                        cDay.count = Int32.Parse(splitedLine[(int)csvData.pushUp]);
-                        break;
-                    }
+            //その日トレーニングを行ったかどうかをカレンダーで表示する
+            cDay.GetComponent<Renderer>().material.mainTexture = null;
+            //csvの読み込み
+            StreamReader sr = new StreamReader(@"saveData.csv", Encoding.GetEncoding("Shift_JIS"));
+            string readLine;
+            while ((readLine = sr.ReadLine()) != null)
+            {
+                string[] splitedLine = readLine.Split(',');
+                //該当する日付があればスタンプを載せる
+                if (MakeDate(cDay.dateValue) == splitedLine[(int)csvData.date])
+                {
+                    cDay.GetComponent<Renderer>().material.mainTexture = stamp;
                 }
             }
-        }
-        //ストリームを閉じる
-        sr.Close();
-*/
+		}
+
         //カレンダーの月を更新する
 		monthText.GetComponent<TextMesh>().text = current.Year.ToString() + "年 " + current.Month.ToString() + "月";
 
 	}
 
-    //csvに回数を記録する
-/*    public void CallRecorder(){
-        StreamReader sr = new StreamReader(@"saveData.csv", Encoding.GetEncoding("Shift_JIS"));
-        string readLine;    //読み込む文字列
-        string writeLine = "";   //書き込む文字列
-        //csvの読み込み
-        while ((readLine = sr.ReadLine()) != null)
-        {
-            string[] splitedLine = readLine.Split(',');
-            //今月の成果でなければそのまま記録
-            if (!isInRange(splitedLine[(int)csvData.date])){
-                writeLine += string.Join(",", splitedLine) + "\r";
-            }
-        }
-        sr.Close();
-
-        StreamWriter sw = new StreamWriter(@"saveData.csv", false, Encoding.GetEncoding("Shift_JIS"));
-        sw.Write(writeLine);
-        //今月の成果ならば改めて保存する
-        foreach(var cDay in Days){
-            if (cDay.count == 0) continue;
-            writeLine = MakeDate(cDay.dateValue) + "," + cDay.count.ToString() + "\r";
-            sw.Write(writeLine);
-        }
-        sw.Close();
-    }
-*/
     //日付でシリアルナンバーを作成するメソッド
     string MakeDate(DateTime tm)
     {
         return tm.Year.ToString() + (((int)tm.Month < 10) ? "0" : "")
                + tm.Month.ToString() + (((int)tm.Day < 10) ? "0" : "") + tm.Day.ToString();
-    }
-
-    //シリアルが今月のカレンダーに入ってるかを判断する
-    bool isInRange(string date){
-        int headDate = Int32.Parse(MakeDate(Days[0].dateValue));    //カレンダーの日付の最初のシリアル
-        int tailDate = Int32.Parse(MakeDate(Days[Days.Length - 1].dateValue));  //カレンダーの日付の最後のシリアル
-        int readDate = Int32.Parse(date); //調べるカレンダーの日付のシリアル
-        return (readDate >= headDate && readDate <= tailDate) ? true : false;
     }
 
 	public void goNext(){
