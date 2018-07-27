@@ -7,9 +7,8 @@ using UnityEngine;
 
 public class CalendarRecorder : MonoBehaviour
 {
-
     enum csvData { date, pushUp, crunch };  //enumによるインデックスの宣言(記録用)
-    int csvSize = Enum.GetNames(typeof(csvData)).Length;
+    int csvSize = Enum.GetNames(typeof(csvData)).Length;    //enumの大きさ
     private string directory;   //データを保存する場所
     DateTime current = new DateTime(DateTime.Today.Year, DateTime.Today.Month, DateTime.Today.Day);
 

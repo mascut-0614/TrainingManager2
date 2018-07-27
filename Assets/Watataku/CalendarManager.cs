@@ -10,6 +10,7 @@ using UnityEngine.UI;
 public class CalendarManager : MonoBehaviour
 {
     enum csvData { date, pushUp, crunch };  //enumによるインデックスの宣言(記録用)
+    int csvSize = Enum.GetNames(typeof(csvData)).Length;    //enumの大きさ
 	public GameObject calendarParent;   //親オブジェクト
 	public GameObject nextButton;   //来月
 	public GameObject prevButton;   //先月
@@ -59,7 +60,16 @@ public class CalendarManager : MonoBehaviour
 		int day = 1;
 		//今月の1日目
 		var first = new DateTime(current.Year, current.Month, day);
+        //月ごとの成果の合計
+        int total = 0;  
 
+        //今月の1日と晦日を入れる
+        DateTime headDate = new DateTime(current.Year, current.Month, 1);
+        DateTime tailDate = new DateTime(current.Year, current.Month, DateTime.DaysInMonth(current.Year, current.Month)); 
+
+        //csv読み込み用のストリームと文字列
+        StreamReader sr;
+        string readLine;
 
 		//来月
 		var nextMonth = current.AddMonths(1);
@@ -74,6 +84,9 @@ public class CalendarManager : MonoBehaviour
         {
             //カウントを一旦初期化
             cDay.count = 0;
+            //スタンプの初期化
+            cDay.GetComponent<Renderer>().material.mainTexture = null;
+
 			//今月の1日より前は先月の日にちを入れる
 			if (cDay.index <= (int)first.DayOfWeek)
 			{
@@ -89,28 +102,45 @@ public class CalendarManager : MonoBehaviour
 			//今月の日にちを入れる
 			else
 			{
-				cDay.dateValue = new DateTime(current.Year, current.Month, day);
+                cDay.dateValue = new DateTime(current.Year, current.Month, day);
 				day++;
 			}
 
+            //今月の日にちでなければボタンを非表示にする
+            if(isInRange(MakeDate(cDay.dateValue), headDate, tailDate)){
+                
+            }
+
             //その日トレーニングを行ったかどうかをカレンダーで表示する
-            cDay.GetComponent<Renderer>().material.mainTexture = null;
-            //csvの読み込み
-            StreamReader sr = new StreamReader(@"saveData.csv", Encoding.GetEncoding("Shift_JIS"));
-            string readLine;
+            sr = new StreamReader(@"saveData.csv", Encoding.GetEncoding("Shift_JIS"));
             while ((readLine = sr.ReadLine()) != null)
             {
                 string[] splitedLine = readLine.Split(',');
                 //該当する日付があればスタンプを載せる
-                if (MakeDate(cDay.dateValue) == splitedLine[(int)csvData.date])
-                {
+                if (MakeDate(cDay.dateValue) == splitedLine[(int)csvData.date] && isInRange(MakeDate(cDay.dateValue), headDate, tailDate)){
                     cDay.GetComponent<Renderer>().material.mainTexture = stamp;
                 }
             }
 		}
-
         //カレンダーの月を更新する
 		monthText.GetComponent<TextMesh>().text = current.Year.ToString() + "年 " + current.Month.ToString() + "月";
+
+        sr = new StreamReader(@"saveData.csv", Encoding.GetEncoding("Shift_JIS"));
+        //今月の成果をtotalに加算する
+        while((readLine = sr.ReadLine())!=null){
+            string[] splitedLine = readLine.Split(',');
+            if (isInRange(splitedLine[(int)csvData.date], headDate, tailDate))
+            {
+                //totalを合算する
+                for (int i = 1; i < csvSize; i++)
+                {
+                    total += Int32.Parse(splitedLine[i]);
+                }
+            }
+        }
+        sr.Close();
+
+        //合計値によって背景を変更する
 
 	}
 
@@ -121,14 +151,24 @@ public class CalendarManager : MonoBehaviour
                + tm.Month.ToString() + (((int)tm.Day < 10) ? "0" : "") + tm.Day.ToString();
     }
 
+    //シリアルが今月のカレンダーに入ってるかを判断する
+    public bool isInRange(string date, DateTime head, DateTime tail)
+    {
+        int headDate = Int32.Parse(MakeDate(head));    //カレンダーの日付の最初のシリアル
+        int tailDate = Int32.Parse(MakeDate(tail));  //カレンダーの日付の最後のシリアル
+        int readDate = Int32.Parse(date); //調べるカレンダーの日付のシリアル
+        return (readDate >= headDate && readDate <= tailDate) ? true : false;  //レンジに入っていればtrueを返す
+    }
+
+    //来月のカレンダーに移る
 	public void goNext(){
-		//CallRecorder();
         current = current.AddMonths(1); //月を進める
-        setCalendar();
+        setCalendar();                  //カレンダーの更新
 	}
+
+    //先月のカレンダーに移る
 	public void goPrev(){
-		//CallRecorder();
         current = current.AddMonths(-1);//月を戻す
-        setCalendar();
+        setCalendar();                  //カレンダーの更新
 	}
 }
