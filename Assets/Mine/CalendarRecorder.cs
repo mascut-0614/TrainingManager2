@@ -32,7 +32,7 @@ public class CalendarRecorder : MonoBehaviour
             if (splitedLine[(int)csvData.date] != MakeDate(current))
                 writeLine += string.Join(",", splitedLine) + "\r";
             else {
-                //今日の成果であれば、一時的に配列を保zんする
+                //今日の成果であれば、一時的に配列を保存する
                 tmpLine = splitedLine;
                 isExist = true;
             }
@@ -45,7 +45,7 @@ public class CalendarRecorder : MonoBehaviour
         sw.Write(writeLine);
         //今日の成果を書き込む
         writeLine = MakeDate(current);
-        for (int i = 0; i < csvSize; i++){
+        for (int i = 1; i < csvSize; i++){
             //すでに書き込みがあれば更新する
             //トレーニングのタイプで加算する数字とそうでない数字を分ける
             if (isExist)
