@@ -41,6 +41,8 @@ public class TrainingChecker : MonoBehaviour {
                             }
                             if (count == 10)
                             {
+                                //レコーダを呼び出して書き込む
+                                FindObjectOfType<CalendarRecorder>().CallRecorder(count, 1);
 								count = 0;
                                 audioSource.clip = clear;
                                 audioSource.Play();
@@ -73,6 +75,8 @@ public class TrainingChecker : MonoBehaviour {
                         }
                         if (count == 10)
                         {
+                            //レコーダを呼び出して書き込む
+                            FindObjectOfType<CalendarRecorder>().CallRecorder(count, 2);
 							count = 0;
                             audioSource.clip = clear;
                             audioSource.Play();
