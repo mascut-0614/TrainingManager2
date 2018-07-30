@@ -24,6 +24,9 @@ public class CalendarManager : MonoBehaviour
     Texture2D stamp;                        //スタンプのテクスチャ
     Texture2D stamp2;                       //スタンプのテクスチャ2
 
+	public GameObject Dlight;
+	public static int total;
+	CSVReader csvreader = new CSVReader();
 	// Use this for initialization
 	void Start()
 	{
@@ -61,14 +64,14 @@ public class CalendarManager : MonoBehaviour
 		//今月の1日目
 		var first = new DateTime(current.Year, current.Month, day);
         //月ごとの成果の合計
-        int total = 0;  
+        total = 0;  
 
         //今月の1日と晦日を入れる
         DateTime headDate = new DateTime(current.Year, current.Month, 1);
-        DateTime tailDate = new DateTime(current.Year, current.Month, DateTime.DaysInMonth(current.Year, current.Month)); 
+        DateTime tailDate = new DateTime(current.Year, current.Month, DateTime.DaysInMonth(current.Year, current.Month));
 
-        //csv読み込み用のストリームと文字列
-        StreamReader sr;
+		//csv読み込み用のストリームと文字列
+		StreamReader sr;
         string readLine;
 
 		//来月
@@ -111,8 +114,8 @@ public class CalendarManager : MonoBehaviour
                 
             }
 
-            //その日トレーニングを行ったかどうかをカレンダーで表示する
-            sr = new StreamReader(@"saveData.csv", Encoding.GetEncoding("Shift_JIS"));
+			//その日トレーニングを行ったかどうかをカレンダーで表示する
+			sr = new StreamReader(@"saveData.csv", Encoding.GetEncoding("Shift_JIS"));
             while ((readLine = sr.ReadLine()) != null)
             {
                 string[] splitedLine = readLine.Split(',');
@@ -121,6 +124,7 @@ public class CalendarManager : MonoBehaviour
                     cDay.GetComponent<Renderer>().material.mainTexture = stamp;
                 }
             }
+
 		}
         //カレンダーの月を更新する
 		monthText.GetComponent<TextMesh>().text = current.Year.ToString() + "年 " + current.Month.ToString() + "月";
@@ -140,8 +144,18 @@ public class CalendarManager : MonoBehaviour
         }
         sr.Close();
 
-        //合計値によって背景を変更する
-
+		//合計値によって背景を変更する
+		if (total >= 400)
+        {
+            Dlight.GetComponent<Light>().color = new Color(255f/255f, 164f/255f, 49f/255f);
+        }
+        else
+        {
+			float red = total / 400f;
+			float green = 164f / 255f * total / 400f;
+			float blue = 49f * total / 400f / 255f;
+			Dlight.GetComponent<Light>().color = new Color(red,green, blue);
+        }
 	}
 
     //日付でシリアルナンバーを作成するメソッド

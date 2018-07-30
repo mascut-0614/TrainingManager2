@@ -18,6 +18,7 @@ public class CalendarRecorder : MonoBehaviour
     {
         //読み込み用のストリームの宣言
         StreamReader sr = new StreamReader(@"saveData.csv", Encoding.GetEncoding("Shift_JIS"));
+		Debug.Log("Hi");
         string readLine;    //読み込む文字列
         string writeLine = "";  //書き込む文字列
         string[] tmpLine = new string[csvSize]; //成果があった場合に一時的に保存する
